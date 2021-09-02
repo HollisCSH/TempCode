@@ -1,0 +1,83 @@
+//=======================================Copyright(c)===========================================
+// 								  深圳易马达科技有限公司	
+//---------------------------------------文件信息----------------------------------------------
+//文件名   	: BSPSystemCfg.h
+//创建人  	: Handry
+//创建日期	:
+//描述	    : 系统配置文件
+//-----------------------------------------------当前版本修订----------------------------------
+//修改人   	:
+//版本	    : 
+//修改日期	:
+//描述	    :
+//=============================================================================================
+#ifndef _BSPSYSTEMCFG_H
+#define _BSPSYSTEMCFG_H
+
+//=============================================================================================
+//头文件
+//=============================================================================================
+#include "BSPTypeDef.h"
+
+//=============================================================================================
+//用户类型自定义
+//=============================================================================================
+
+//-----------------------------------用户模块使能配置----------------------------------------
+#define 	System_WDOGEN       0
+#define 	System_ADCEN        1
+#define 	System_PWMEN        0
+#define 	System_CANEN        0
+#define 	System_SPI0EN       1
+#define 	System_SPI1EN       1
+#define 	System_TIMEREN      1	//定时器任务调度使能时开启
+#define 	System_EEPROMEN     0
+#define 	System_FLASHEN      0
+#define 	System_IIC0EN       1
+#define 	System_IIC1EN       1
+#define 	System_RTCEN        0
+#define 	System_UART0EN      0
+#define 	System_UART1EN      0
+#define 	System_UART2EN      0
+#define 	System_GPIOEN       1
+#define 	System_SysTickEN    0
+#define 	System_LowPowerEN   0
+
+//总线时钟频率
+#define 	BUS_CLK_HZ		 12000000
+
+//----------------------------------WDOG模块配置-----------------------------------------------
+#define 	WDOG_FEEDTIME    3000     	//看门狗溢出时间，单位1ms
+
+
+//----------------------------------FLASH模块配置-----------------------------------------------
+#define 	FLASH_CLOCK    	BUS_CLK_HZ  //flash配置使用时钟，使用总线时钟
+
+
+//----------------------------------ADC模块配置-----------------------------------------------
+#define 	ADC_SAMPMODE	 			BSP_ADCMODE_12BIT     	//ADC采样模式
+#define		CONN_TEMP_ADC_CHAN_MASK		0x0800		            //ADC采样通道,通道11,连接器温度采样通道
+#define		PCB_TVS_TEMP_ADC_CHAN_MASK	0x0100		            //ADC采样通道,通道8,PCB和TVS管温度采样通道
+#define		PRE_DSG_SHORT_ADC_CHAN_MASK	0x0200		            //ADC采样通道,通道9，短路检测电压采样通道
+#define		CELL_VOLT_16_ADC_CHAN_MASK	0x0400		            //ADC采样通道,通道10，第16节温度采样通道
+//----------------------------------SCI模块配置------------------------------------------------
+
+#define 	UART0_USEBPS     115200     //SCI0波特率
+
+#define 	UART1_USEBPS     115200		//SCI1波特率
+
+#define 	UART2_USEBPS     115200		//SCI2波特率
+
+//----------------------------------SPI模块配置------------------------------------------------
+#define		SPI0_BAUDRATE	 4000000		//SPI0波特率		单位:  bps
+#define		SPI1_BAUDRATE	 6000000		//SPI1波特率		单位:  bps
+
+#define		SPI0_MASTER		 1    		//SPI0主从机选择  1：主机  0：从机
+#define		SPI1_MASTER		 1    		//SPI1主从机选择  1：主机  0：从机
+
+#define		SPI0_MODE		 1    		//SPI0模式选择  	0：mode0	 1：mode1 2：mode2  3：mode3
+#define		SPI1_MODE		 0    		//SPI1模式选择  	0：mode0	 1：mode1 2：mode2  3：mode3
+
+#endif
+
+/*****************************************end of BSPSystemCfg.h*****************************************/
