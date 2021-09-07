@@ -167,6 +167,12 @@ void IOCheckACCWakeIntCallback(void)
 void IOCheckExModuleIntCallback(void)
 {
     gIOWakeUpCond |= WAKE_COND_EXMODULE_MASK;
+	//使用INT触发对保险丝的检测
+	//如果检测状态为未检测或者检测已经完成，则开始添加检测任务，否则不添加，避免任务冲突重叠
+	if(0 == gFuseDetEn)
+	{
+		gFuseDetEn = 1;
+	}
 }
 
 //=============================================================================================

@@ -30,6 +30,9 @@ extern "C"{
 //关闭回显响应处理
 ATCMD_RC Gprs_RspATE0(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd);
 
+//Cfun关闭注册网络处理
+ATCMD_RC Gprs_RspCfun(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd);
+
 //设置发送接收格式
 ATCMD_RC Gprs_Rsp_SET_FORMAT(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd);
 

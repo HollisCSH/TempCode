@@ -86,6 +86,7 @@ typedef struct _SimCard
 	SimState 	state;          //SIM的状态
 	
 	uint8  	isCommOk;
+    uint8  	isAlwaysCommOk;
 	uint8  	isReset;
 	uint8  	isLowPower;
     uint8   isShutDown;

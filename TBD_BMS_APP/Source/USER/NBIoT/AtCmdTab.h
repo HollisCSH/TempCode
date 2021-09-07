@@ -24,6 +24,9 @@ enum
 {
     CMD_RESET    = 0
 	,CMD_ATE
+    ,CMD_CFUN_CLOSE
+    ,CMD_QCSEARFCN
+    ,CMD_CFUN_OPEN
     ,CMD_SET_FORMAT //设置发送/接收的数据格式
     
 	,CMD_CGNSPWR  

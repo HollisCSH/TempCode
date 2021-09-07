@@ -134,7 +134,20 @@
 #define 	MAX_CHG_VOLT 		  	3600						//最高单体充电电压
 #define     MAX_CHG_CURR            850                         //充电器最大充电电流
 #define     HW_VER_MAIN_BAT_TYPE    15                          //磷酸铁锂电芯
-#define 	BMS_BAT_16S				1						    //13串电池
+#define 	BMS_BAT_16S				1						    //16串电池
+
+//25Ah国产赣锋 磷酸铁锂电池
+#elif		defined(LFP_GF_25000MAH_16S)
+#define 	BAT_NORM_CAP 		 	25000						//电池标称容量
+#define 	BAT_NORM_CAP_SOX 		24500						//电池标称容量 SOX
+#define 	BAT_NORM_VOLT 		 	3200						//电池标称电压
+#define 	BAT_TYPE 			 	3							//电池类型 磷酸铁锂电芯，从型号0开始
+#define 	BAT_CSOP_RES 			110							//充电电池阻抗估值mR
+#define 	BAT_SLEEP_CURR 			200 						//浅睡眠保护电流0.20A
+#define 	MAX_CHG_VOLT 		  	3600						//最高单体充电电压
+#define     MAX_CHG_CURR            850                         //充电器最大充电电流
+#define     HW_VER_MAIN_BAT_TYPE    15                          //磷酸铁锂电芯
+#define 	BMS_BAT_16S				1						    //16串电池
 
 //32Ah国产孚能 三元电池
 #elif		defined(SY_PB_32000MAH_14S)
@@ -181,6 +194,19 @@
 #define 	BAT_NORM_CAP_SOX 		19000						//电池标称容量 SOX
 #define 	BAT_NORM_VOLT 		 	3200						//电池标称电压
 #define 	BAT_TYPE 			 	0							//电池类型 磷酸铁锂电芯，从型号0开始
+#define 	BAT_CSOP_RES 			110							//充电电池阻抗估值mR
+#define 	BAT_SLEEP_CURR 			200 						//浅睡眠保护电流0.20A
+#define 	MAX_CHG_VOLT 		  	3600						//最高单体充电电压
+#define     MAX_CHG_CURR            850                         //充电器最大充电电流
+#define     HW_VER_MAIN_BAT_TYPE    15                          //磷酸铁锂电芯
+#define 	BMS_BAT_20S				1						    //20串电池
+
+//20Ah国产鹏辉 磷酸铁锂电池
+#elif		defined(LFP_PH_20000MAH_20S)
+#define 	BAT_NORM_CAP 		 	20000						//电池标称容量
+#define 	BAT_NORM_CAP_SOX 		19000						//电池标称容量 SOX
+#define 	BAT_NORM_VOLT 		 	3200						//电池标称电压
+#define 	BAT_TYPE 			 	1							//电池类型 磷酸铁锂电芯，从型号0开始
 #define 	BAT_CSOP_RES 			110							//充电电池阻抗估值mR
 #define 	BAT_SLEEP_CURR 			200 						//浅睡眠保护电流0.20A
 #define 	MAX_CHG_VOLT 		  	3600						//最高单体充电电压

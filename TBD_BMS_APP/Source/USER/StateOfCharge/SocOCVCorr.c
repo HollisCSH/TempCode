@@ -53,7 +53,7 @@ static const float gChangeOCVTab[SOC_T_LEN][SOC_V_LEN] =  //ΔSOC/ΔOCV表(1mV/1
     0.192308,0.139535,0.109091,0.122449,0.098039,0.111111,0.107143,0.101695,0.054054,
     },
 };
-#elif defined(LFP_HL_25000MAH_16S)
+#elif defined(LFP_HL_25000MAH_16S) || defined(LFP_PH_20000MAH_20S) || defined(LFP_GF_25000MAH_16S)
 static const float gChangeOCVTab[SOC_T_LEN][SOC_V_LEN] =  //ΔSOC/ΔOCV表(1mV/1)
 {
     {
@@ -106,7 +106,7 @@ static float gChangeOCVTab[SOC_T_LEN][SOC_V_LEN] =  //ΔSOC/ΔOCV表(1mV/1%)
 
 static t_OCVCrt sSocOCVCrt = {0};               //SOC修正结构
 
-#if defined(SY_PB_32000MAH_14S) || defined(SY_PB_32000MAH_16S) || defined(SY_PB_32000MAH_17S) || defined(LFP_HL_25000MAH_16S) || defined(LFP_TB_20000MAH_20S)
+#if defined(SY_PB_32000MAH_14S) || defined(SY_PB_32000MAH_16S) || defined(SY_PB_32000MAH_17S) || defined(LFP_HL_25000MAH_16S) || defined(LFP_TB_20000MAH_20S) || defined(LFP_GF_25000MAH_16S) || defined(LFP_PH_20000MAH_20S)
     
 #else    
 static u8 sInitExpFlag = 0;                     //初始化异常标志
@@ -124,9 +124,9 @@ static u8 sInitExpFlag = 0;                     //初始化异常标志
 //=============================================================================================
 static void SocOCVTabInit(void)
 {
-#if defined(SY_PB_32000MAH_14S) || defined(SY_PB_32000MAH_16S) || defined(SY_PB_32000MAH_17S) || defined(LFP_HL_25000MAH_16S) || defined(LFP_TB_20000MAH_20S)
+#if defined(SY_PB_32000MAH_14S) || defined(SY_PB_32000MAH_16S) || defined(SY_PB_32000MAH_17S) || defined(LFP_HL_25000MAH_16S) || defined(LFP_TB_20000MAH_20S) || defined(LFP_GF_25000MAH_16S) || defined(LFP_PH_20000MAH_20S)
     
-#else
+#else    
     u16 temp16 = 0;
     u8 j = 0,k = 0;
     const u8 * socB = (void *)0;
@@ -346,7 +346,7 @@ static void SocOCVCorrSoc(void)
         CorrRange = (gBatteryInfo.Status.ProtSta == eProt_Full)? 2:1;
         
         //第一次修正，不管什么范围，都进行修正
-       #if defined(LFP_TB_20000MAH_20S) | defined(LFP_HL_25000MAH_16S)
+       #if defined(LFP_TB_20000MAH_20S) | defined(LFP_HL_25000MAH_16S) || defined(LFP_GF_25000MAH_16S) || defined(LFP_PH_20000MAH_20S)
         if(False == SocGetEepFirstFlag())  //修正在1%内
         #else
         if(IsInside((s8)(0-CorrRange), changSoc, CorrRange) && False == SocGetEepFirstFlag())  //修正在1%内
@@ -368,7 +368,7 @@ static void SocOCVCorrSoc(void)
         //周期修正
         sSocOCVCrt.IsOcvCorrPeroid = False;
         
-        #if defined(LFP_TB_20000MAH_20S) | defined(LFP_HL_25000MAH_16S)
+        #if defined(LFP_TB_20000MAH_20S) | defined(LFP_HL_25000MAH_16S) | defined(LFP_GF_25000MAH_16S) || defined(LFP_PH_20000MAH_20S)
         CorrRange = 50;
         #else
         CorrRange = 10;

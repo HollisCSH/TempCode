@@ -34,7 +34,7 @@
 
 #define     SOC_POINT_CRT_NUM       5               //soc点修正点数目
 
-#elif defined(LFP_HL_25000MAH_16S)
+#elif defined(LFP_HL_25000MAH_16S) || defined(LFP_PH_20000MAH_20S) || defined(LFP_GF_25000MAH_16S)
 #define     SOC_T_LEN               4               //SOC OCV修正温度表长度
 #define     SOC_V_LEN               21              //SOC OCV修正电压表长度
 

@@ -31,6 +31,10 @@
 #define     PROT_MAX_CHG_CURR     2000    //最大充电保护电流为20A
 #elif defined(LFP_HL_25000MAH_16S)
 #define     PROT_MAX_CHG_CURR     2500    //最大充电保护电流为25A
+#elif defined(LFP_GF_25000MAH_16S)
+#define     PROT_MAX_CHG_CURR     2500    //最大充电保护电流为25A
+#elif defined(LFP_PH_20000MAH_20S)
+#define     PROT_MAX_CHG_CURR     2000    //最大充电保护电流为20A
 #else
 #define     PROT_MAX_CHG_CURR     1200    //最大充电保护电流为12A
 #endif

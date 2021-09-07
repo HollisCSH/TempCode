@@ -43,6 +43,7 @@ uint32 g_ActiveFlag = 0;
 int g_MaxGpsCount = MIN_GPS_COUNT;
 WakeupType g_WakeupType;
 static SwTimer gFsmTimer;
+static SwTimer gWdgTimer;
 
 //=============================================================================================
 //定义接口函数
@@ -61,6 +62,7 @@ void Fsm_Init(void)
     gGSMCond.gsmstartsec = GET_TICKS();
     
     SwTimer_Init(&gFsmTimer, 0, 0);
+    SwTimer_Init(&gWdgTimer, 0, 0);
 }
 
 //FSM启动
@@ -741,7 +743,44 @@ void Fsm_BMSMsgProc(void)
                 break;
             }
         }
-    }    
+    }
+    
+    if(NB_IOT_SEND_WIFI_PEROID >= 30)
+    {
+        if(g_pSimCard->isAlwaysCommOk == True)
+        {
+            g_pSimCard->isAlwaysCommOk = False;
+            SwTimer_Stop(&gWdgTimer);
+        }
+        else
+        {
+            if(False == SwTimer_IsStart(&gWdgTimer) && False == Sim_IsShutDown())
+            {
+                SwTimer_Start(&gWdgTimer,20000,0);
+            }
+            else if(True == Sim_IsShutDown())
+            {
+                SwTimer_Stop(&gWdgTimer);
+            }
+            else
+            {
+                ;
+            }
+            
+            if(SwTimer_isTimerOutId(&gWdgTimer,0))
+            {
+                GSMInit();
+                WifiDealInit();
+                
+                //启动NB模块任务
+                BSPTaskStart(TASK_ID_NB_IOT_TASK, 50);        
+            }
+        }    
+    }
+    else
+    {
+        SwTimer_Init(&gWdgTimer, 0, 0);
+    }
 }
 
 //FSM运行处理函数

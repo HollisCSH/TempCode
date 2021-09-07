@@ -31,7 +31,7 @@
 #elif       defined(LFP_TB_20000MAH_20S)
 #define     NORMAL_TEST_LOW_VOLT    2800
 #define     NORMAL_TEST_HIGH_VOLT   3600
-#elif		defined(LFP_HL_25000MAH_16S)
+#elif		defined(LFP_HL_25000MAH_16S) || defined(LFP_PH_20000MAH_20S) || defined(LFP_GF_25000MAH_16S)
 #define     NORMAL_TEST_LOW_VOLT    2800
 #define     NORMAL_TEST_HIGH_VOLT   3600
 #else

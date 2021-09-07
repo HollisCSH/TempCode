@@ -32,6 +32,7 @@ t_WIFI_MSG gWifiDealMsg =
 
 WifiInfo wifiInfo;  /* WIFI接收的信息拆解 */
 t_WIFI_Coor gWifiCoor;    /* WIFI Mac解析点 */
+s16 gMaxRssi = 0;
 Queue_old gWifiCoorQueue;
 pt gPTWifi;         /* WIFI任务pt线程控制变量 */
 
@@ -61,6 +62,7 @@ void WifiDealInit(void)
 	QUEUE_init(&gWifiCoorQueue, &gWifiDealMsg.WifiCoor, sizeof(t_WIFI_Coor), GET_ELEMENT_COUNT(gWifiDealMsg.WifiCoor));  
     
     PT_INIT(&gPTWifi);	//初始化通信任务pt线程控制变量
+    gMaxRssi = 0xFFFF;
 }
 
 //=============================================================================================
@@ -158,10 +160,12 @@ void WifiDealWSCANPharse(void)
     gWifiDealMsg.Wslen = WifiDealNumOfStr(wscan,(u8 *)CUT_STRING);
     
     /* 无有效wifi信号解析 */
-    if(1 >= gWifiDealMsg.Wslen)
+    if(2 >= gWifiDealMsg.Wslen)
     {
         gWifiDealMsg.WifiInfolen = 0;
         gWifiDealMsg.WifiFlag.WifiFlagBit.IsUpdInfo = False;
+        QUEUE_removeAll(&gWifiCoorQueue);
+        gMaxRssi = 0xFFFF;        
         return;
     }
     /* 超过WifiTab存储的长度 */
@@ -194,6 +198,10 @@ void WifiDealWSCANPharse(void)
             sscanf(wifiInfo.RSSI, "%d", &gWifiCoor.RSSI);
             //rssi计算，rssi + 100，手机扫描出来如果是-70dbm，scan是30
             gWifiCoor.RSSI -= 100;
+            
+            if(i == 0)
+                gMaxRssi = gWifiCoor.RSSI + 100;
+            
             if(BssidCnt != strtoken(wifiInfo.BSSID, ":" ,(char**)&bssidinfo, BssidCnt)) 
             {
                 continue;
@@ -404,6 +412,8 @@ void WifiDealMainTask(void *p)
                     sRetryCnt++;
                     if(sRetryCnt >= WIFI_ONETIME_RETRY)
                     {
+                        gWifiDealMsg.WifiFlag.WifiFlagBit.IsUpdInfo = True;
+                        g_pGprs->isSendWifiMac = True;
                         sRetryCnt = 0;
                     }
                     else

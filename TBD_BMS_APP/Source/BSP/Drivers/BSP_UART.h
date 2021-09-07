@@ -19,17 +19,15 @@
 
 #define UART_WIFI_DEBUG			LPUART1
 #define UART_WIFI_DEBUG_BAUD 	115200
-#define UART_WIFI_RX_PORT     	GPIOB
+#define UART_WIFI_PORT     	    GPIOB
 #define UART_WIFI_RX_PIN      	GPIO_PIN_10
-#define UART_WIFI_TX_PORT     	GPIOB
 #define UART_WIFI_TX_PIN      	GPIO_PIN_11
 #define UART_WIFI_IRQn        	USART3_4_5_6_LPUART1_IRQn
 
 #define UART_GPS				USART1
 #define UART_GPS_BAUD 	      	9600
-#define UART_GPS_RX_PORT      	GPIOC
+#define UART_GPS_PORT      	    GPIOC
 #define UART_GPS_RX_PIN       	GPIO_PIN_5
-#define UART_GPS_TX_PORT      	GPIOB
 #define UART_GPS_TX_PIN       	GPIO_PIN_4
 #define UART_GPS_IRQn         	USART1_IRQn
 

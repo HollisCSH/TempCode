@@ -26,7 +26,7 @@ t_CONFIG_PARA gConfigBuff;//保存配置的输入buffer
 
 t_DT_PARA gConfigChgCurr; //充电过流实际使用的配置值
 
-#if defined(LFP_AK_15000MAH_16S) || defined(LFP_TB_20000MAH_20S) || defined(LFP_HL_25000MAH_16S)
+#if defined(LFP_AK_15000MAH_16S) || defined(LFP_TB_20000MAH_20S) || defined(LFP_HL_25000MAH_16S) || defined(LFP_GF_25000MAH_16S) || defined(LFP_PH_20000MAH_20S)
 //时间数字为秒，S
 const t_CONFIG_PARA cConfigInit =	//初始化值通过校准等命令写入Flash，flash异常则赋值给gConfig
 {
@@ -40,16 +40,8 @@ const t_CONFIG_PARA cConfigInit =	//初始化值通过校准等命令写入Flash
 		{4 ,1 ,2 ,2 },			//1 2 3 4 级恢复时间
 	},
 	{//单体电池欠压
-		#if defined(LFP_HL_25000MAH_16S)
 		{3000,2900,2800,2600},	//1 2 3 4 级成熟值
 		{3100,3000,3000,2800},	//1 2 3 4 级恢复值
-		#elif defined(LFP_TB_20000MAH_20S)
-		{3000,2900,2800,2600},	//1 2 3 4 级成熟值
-		{3100,3000,3000,2800},	//1 2 3 4 级恢复值
-        #else
-		{3000,2900,2800,2600},	//1 2 3 4 级成熟值
-		{3100,3000,3000,2800},	//1 2 3 4 级恢复值        
-		#endif
 		{1 ,2 ,2 ,4 },			//1 2 3 4 级成熟时间
 		{1 ,2 ,2 ,2 },			//1 2 3 4 级恢复时间
 	},
@@ -66,10 +58,13 @@ const t_CONFIG_PARA cConfigInit =	//初始化值通过校准等命令写入Flash
 		{4 ,3 ,2 ,1 },			//1 2 3 4 级恢复时间
 	},
 	{//单体充电过温
-//        {320,320,450,550},	//1 2 3 4 级成熟值
-//		  {280,280,430,500},	//1 2 3 4 级恢复值
-        {320,320,450,600},	//1 2 3 4 级成熟值
+        #if defined(LFP_HL_25000MAH_16S) || defined(LFP_PH_20000MAH_20S) || defined(LFP_GF_25000MAH_16S)
+		{320,320,450,600},	//1 2 3 4 级成熟值
 		{280,280,430,550},	//1 2 3 4 级恢复值
+        #else
+		{320,320,450,550},	//1 2 3 4 级成熟值
+		{280,280,430,500},	//1 2 3 4 级恢复值
+        #endif
 		{3 ,3 ,2 ,3 },		//1 2 3 4 级成熟时间
 		{3 ,3 ,2 ,5 },		//1 2 3 4 级恢复时间
 	},
@@ -86,7 +81,7 @@ const t_CONFIG_PARA cConfigInit =	//初始化值通过校准等命令写入Flash
 		{4 ,3 ,2 ,5 },		//1 2 3 4 级恢复时间
 	},
 	{//单体放电欠温
-    #if defined(LFP_HL_25000MAH_16S)
+    #if defined(LFP_HL_25000MAH_16S) || defined(LFP_PH_20000MAH_20S)
 		{0,0,-150,-150},	//1 2 3 4 级成熟值
 		{50,50,-140,-100},	//1 2 3 4 级恢复值
     #else
@@ -115,10 +110,12 @@ const t_CONFIG_PARA cConfigInit =	//初始化值通过校准等命令写入Flash
         {1 ,9  ,10 ,11},    //1 2 3 4 级恢复时间
 	},
 	{//放电过流
-		#if defined(LFP_HL_25000MAH_16S)
+		#if defined(LFP_HL_25000MAH_16S) || defined(LFP_GF_25000MAH_16S)
 		{-3000,-4000,-10000,-20000},	//1 2 3 4 级成熟值
 		#elif defined(LFP_TB_20000MAH_20S)
 		{-3000,-4000,-10000,-20000},	//1 2 3 4 级成熟值
+        #elif defined(LFP_PH_20000MAH_20S)
+        {-3000,-5000,-10000,-20000},	//1 2 3 4 级成熟值
 		#else
 		{-3000,-4000,-6000,-8000},	//1 2 3 4 级成熟值
 		#endif
@@ -253,7 +250,11 @@ const t_CONFIG_PARA cConfigInit =	//初始化值通过校准等命令写入Flash
         40,     //均衡压差阈值
     },      
     {
+        #if defined(LFP_PH_20000MAH_20S)
+        510,	//afe current sample resistor，单位1uR      //B24使用0.5mΩ分流器阻值
+        #else
         1020,	//afe current sample resistor，单位1uR
+        #endif
         0,      //afe current sample offset
 		2000,	//bat16 ADC gain，单位0.01uV/bit
         0,		//bat16 offset，单位1mV

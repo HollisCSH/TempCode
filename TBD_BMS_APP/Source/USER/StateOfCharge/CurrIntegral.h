@@ -38,7 +38,7 @@
 
 #if defined(SY_PB_32000MAH_14S) || defined(SY_PB_32000MAH_16S) || defined(SY_PB_32000MAH_17S)
 //#define ENABLE_CALC_STANDBY_CURR           //是否允许计算板子消耗电流，允许则定义，否则注释
-#elif defined(LFP_TB_20000MAH_20S) || defined(LFP_HL_25000MAH_16S)
+#elif defined(LFP_TB_20000MAH_20S) || defined(LFP_HL_25000MAH_16S) || defined(LFP_GF_25000MAH_16S) || defined(LFP_PH_20000MAH_20S)
 #define ENABLE_CALC_STANDBY_CURR           //是否允许计算板子消耗电流，允许则定义，否则注释
 #endif
 

@@ -76,7 +76,7 @@ const t_DTCheck gDTConfig[DT_CHECK_CFG_LEN] =
 	/* 保险丝失效故障 */
 	{DT_ID_FUSE_FAULT,DT_Enable,DT_LV1, NULL, NULL, &gConfig.fuseflt.mattime, &gConfig.fuseflt.restime, DT_Bool, DTCheckGetFuseFault},
 	/* 加速度计故障 */
-	{DT_ID_ACCELE_FAULT,DT_Disable,DT_LV1, NULL, NULL, &gConfig.accflt.mattime, &gConfig.accflt.restime, DT_Bool, DTCheckGetAccFault},
+	{DT_ID_ACCELE_FAULT,DT_Enable,DT_LV1, NULL, NULL, &gConfig.accflt.mattime, &gConfig.accflt.restime, DT_Bool, DTCheckGetAccFault},
 	/* 其他设备故障  不使能，预留 */
 	{DT_ID_OTHERS_FAULT,DT_Disable,DT_LV1, NULL, NULL, &gConfig.othflt.mattime, &gConfig.othflt.restime, DT_Bool, NULL},
 
@@ -1068,7 +1068,7 @@ void DTCheckChargeOV(void)
     }		//恢复条件
     else
     {
-        #if defined(LFP_AK_15000MAH_16S) || defined(LFP_TB_20000MAH_20S) || defined(LFP_HL_25000MAH_16S)
+        #if defined(LFP_AK_15000MAH_16S) || defined(LFP_TB_20000MAH_20S) || defined(LFP_HL_25000MAH_16S) || defined(LFP_GF_25000MAH_16S) || defined(LFP_PH_20000MAH_20S)
         if((DT_N == DTTimerGetState(DT_ID_VH)))	//充电器拔出 和 高压恢复
         #else
         if((!CommCtrlIsChargerPlugIn()) && (DT_N == DTTimerGetState(DT_ID_VH)))	//充电器拔出 和 高压恢复
@@ -1528,7 +1528,7 @@ void DTCheckAFEProtectFlag(void)
     {
         //g_PROTECT_CTRL.ucurr.level = 2;
     	//直接设置为过流1级故障
-        #if defined(LFP_TB_20000MAH_20S) || defined(SY_PB_32000MAH_17S) || defined(LFP_HL_25000MAH_16S)
+        #if defined(LFP_TB_20000MAH_20S) || defined(SY_PB_32000MAH_17S) || defined(LFP_HL_25000MAH_16S) || defined(LFP_GF_25000MAH_16S) || defined(LFP_PH_20000MAH_20S)
         DTTimerSetState(DT_ID_DIS_CURH_LV2,DT_F);
         #else
         DTTimerSetState(DT_ID_DIS_CURH_LV1,DT_F);
@@ -1828,7 +1828,7 @@ s16 DTCheckGetFuseFault(void)
 s16 DTCheckGetAccFault(void)
 {
     #ifdef BMS_ACC_ENABLE   //是否使用加速度传感器
-	return ((gAccVar.IICErr > 0) || (gAccVar.IICErr > 10));
+	return (gAccVar.IICErr > 6);
     #else
     return 0;
     #endif

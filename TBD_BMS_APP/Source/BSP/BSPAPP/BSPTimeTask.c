@@ -351,7 +351,7 @@ void BSPTimeTask1sBy100ms_2(void)
 	#ifdef BMS_USE_SOX_MODEL
     #if defined(SY_PB_32000MAH_14S) || defined(SY_PB_32000MAH_16S) || defined(SY_PB_32000MAH_17S)
     
-    #elif defined(LFP_HL_25000MAH_16S) || defined(LFP_TB_20000MAH_20S)
+    #elif defined(LFP_HL_25000MAH_16S) || defined(LFP_TB_20000MAH_20S) || defined(LFP_GF_25000MAH_16S) || defined(LFP_PH_20000MAH_20S)
     SocPointCorrTask(); //SOX算法：点修正任务	
     #else
     

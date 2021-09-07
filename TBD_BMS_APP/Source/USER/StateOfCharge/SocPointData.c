@@ -446,7 +446,7 @@ const t_SocPointCorr cSocPointTbl[SOC_POINT_CRT_NUM] =
     },
 };
 
-#elif defined(LFP_HL_25000MAH_16S)
+#elif defined(LFP_HL_25000MAH_16S) || defined(LFP_PH_20000MAH_20S) || defined(LFP_GF_25000MAH_16S)
 //OCV表
 /*********************** < -10(不包含)℃ ******************************/
 const u16 SocOCVVoltTab1[SOC_V_LEN] =      //SOC OCV表

@@ -113,6 +113,8 @@
 #define 	SH367309_CFG_OCC	            4000	//充电过流保护配置 40A
 #elif defined(LFP_HL_25000MAH_16S)
 #define 	SH367309_CFG_OCC	            3000	//充电过流保护配置 20A
+#elif defined(LFP_GF_25000MAH_16S)
+#define 	SH367309_CFG_OCC	            3000	//充电过流保护配置 30A
 #else
 #define 	SH367309_CFG_OCC	            2000	//充电过流保护配置 20A
 #endif
@@ -154,6 +156,9 @@ typedef enum
 typedef struct __SH_AFE_DATA
 {
     u8 afechn;                          //SH367309当前IIC通道
+    u8 CalCrcLen;                       //SH367309需要计算的CRC长度
+    u32 pStructData;                    //SH367309指向保存IIC数据的结构体指针地址
+    u8 IsIICRead;                       //SH367309的IIC读写标志  
 	s8 IICState;						//判断当前IIC状态
     u32 currtime;			            //SH367309当前时间
     e_SH_AFESTA runstatus;		        //SH367309运行状态
@@ -341,16 +346,6 @@ void SH367309AlertIntCallback(void);
 //注    意	:
 //=============================================================================================
 void SH367309MainTask(void *p);
-
-//=============================================================================================
-//函数名称	: u8 SH367309CalcCRC(u8 *datadataptr, u8 len)
-//函数参数	: dataptr需要计算CRC的数组指针, len：数组长度
-//输出参数	:
-//静态变量	:
-//功    能	: 计算数据的CRC
-//注    意	:
-//=============================================================================================
-u8 SH367309CalcCRC(u8 *dataptr, u8 len);
 
 #endif
 

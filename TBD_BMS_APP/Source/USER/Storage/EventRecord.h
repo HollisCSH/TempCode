@@ -62,6 +62,7 @@ typedef struct
 
 #define 	REC_INFO_TYPE_CTRL 	0x01
 #define 	REC_INFO_TYPE_STATE 0x02
+#define 	REC_INFO_TYPE_MODULE_FLAG 0x03  //新增外置模块休眠标志 21/09/07 handry
 
 //=============================================================================================
 //声明变量，供外部使用

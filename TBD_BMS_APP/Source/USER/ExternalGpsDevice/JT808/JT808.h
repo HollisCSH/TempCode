@@ -316,12 +316,16 @@ Sleep			开	关	关	开
 #define		_DEV_MODEL		"B11"
 #elif 		defined(LFP_HL_25000MAH_16S)
 #define		_DEV_MODEL		"B19"
+#elif 		defined(LFP_GF_25000MAH_16S)
+#define		_DEV_MODEL		"B25"
 #elif 		defined(SY_PB_32000MAH_14S)
 #define		_DEV_MODEL		"B21"
 #elif 		defined(SY_PB_32000MAH_17S) || defined(SY_PB_32000MAH_16S)
 #define		_DEV_MODEL		"B22"
 #elif 		defined(LFP_TB_20000MAH_20S)
 #define		_DEV_MODEL		"B20"
+#elif 		defined(LFP_PH_20000MAH_20S)
+#define		_DEV_MODEL		"B24"
 #endif
 
 

@@ -30,7 +30,7 @@
 #define		DT_CHECK_VDIFF_VOLT		(MAX_CHG_VOLT - 50)	        //判断压差过大的最大电压值，三元电芯
 #elif       defined(LFP_TB_20000MAH_20S)
 #define		DT_CHECK_VDIFF_VOLT		3500	        //判断压差过大的最大电压值，磷酸铁锂
-#elif       defined(LFP_HL_25000MAH_16S)
+#elif       defined(LFP_HL_25000MAH_16S) || defined(LFP_PH_20000MAH_20S) || defined(LFP_GF_25000MAH_16S)
 #define		DT_CHECK_VDIFF_VOLT		3500	        //判断压差过大的最大电压值，磷酸铁锂
 #else
 #define		DT_CHECK_VDIFF_VOLT		(MAX_CHG_VOLT - 50)	        //判断压差过大的最大电压值，三元电芯

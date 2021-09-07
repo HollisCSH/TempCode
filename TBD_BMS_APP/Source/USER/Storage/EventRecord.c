@@ -40,6 +40,7 @@ u8 gRecChgBuff=0;             //充电事件记录缓存
 u8 gRecPhotoBuff=0;           //拆开事件记录缓存
 u16 gRecCtrlBuff=0;           //控制事件记录缓存
 u16 gRecStateBuff=0;          //状态事件记录缓存
+u8  gRecIdleFlagBuff=0;       //外置模块休眠状态事件记录缓存
 u8 gRecInfoType;              //控制/动作事件记录类型
 u16 grecdiv = 0;	              //定时记录事件间隔
 u8 gRecIndex;                 //事件记录索引     
@@ -291,6 +292,14 @@ void EventRecordMainTask(void)
         gRecInfoType = REC_INFO_TYPE_STATE;
         gRecType |= REC_TYPE_INFO;
     }
+    
+    //外置模块休眠状态变化
+    else if(gSHDNCond.IdleFlag.IdleFlagByte ^ gRecIdleFlagBuff)
+    {
+        gRecIdleFlagBuff = gSHDNCond.IdleFlag.IdleFlagByte;
+        gRecInfoType = REC_INFO_TYPE_MODULE_FLAG;
+        gRecType |= REC_TYPE_INFO;    
+    }
 
     RECORD: 
     //有事件发生
@@ -354,6 +363,8 @@ void EventRecordMainTask(void)
                 if(gRecordWr.type == REC_TYPE_INFO)
                 {
                     gRecordWr.d[7] = gRecInfoType;
+                    if(REC_INFO_TYPE_MODULE_FLAG == gRecInfoType)
+                        gRecordWr.d[0] = gRecIdleFlagBuff;
                 }
 
                 gStorageCTRL |= FLASH_WR_EVE_MASK;

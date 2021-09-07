@@ -11,7 +11,7 @@
 #include "BSP_IIC.h"
 
 /* 私有宏定义 ----------------------------------------------------------------*/
-#define IIC_TimeOut 200         //获取IIC状态超时时间
+#define IIC_TimeOut 50         //获取IIC状态超时时间
 /* 私有变量 ------------------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
@@ -188,9 +188,9 @@ void BSPI2C_Init(I2C_TypeDef *I2cHandle)
 void BSPI2C_DeInit(I2C_TypeDef *I2cHandle)
 {
 	if(I2cHandle == I2C1)
-		HAL_I2C_DeInit(&hi2c2);
-	else if(I2cHandle == I2C2)
 		HAL_I2C_DeInit(&hi2c1);
+	else if(I2cHandle == I2C2)
+		HAL_I2C_DeInit(&hi2c2);
 }
 
 /*****************************************************
@@ -230,7 +230,7 @@ uint8_t BSP_I2C_MEM_REAR(I2C_TypeDef *hi2c , uint32_t RegAdress, uint8_t *pData,
             timeout++;
             if(timeout >= IIC_TimeOut )
             {
-                gSHAFEData.IICState = IIC_Sta_ERR;
+                gAccVar.IICState = IIC_Sta_ERR;
                 return 1;
             }
 		}
@@ -281,7 +281,7 @@ uint8_t BSP_I2C_MEM_WRITE(I2C_TypeDef *hi2c ,uint32_t RegAdress, uint8_t *pData,
             timeout++;
             if(timeout >= IIC_TimeOut )
             {
-                gSHAFEData.IICState = IIC_Sta_ERR;
+                gAccVar.IICState = IIC_Sta_ERR;
                 return 1;
             }
 		}
@@ -394,7 +394,7 @@ uint32_t BSPIICWriteAndRead(I2C_TypeDef *hi2cx, uint16_t addr, uint8_t *pwstr, u
                 timeout++;
                 if(timeout >= IIC_TimeOut )
                 {
-                    gSHAFEData.IICState = IIC_Sta_ERR;
+                    gAccVar.IICState = IIC_Sta_ERR;
                     return 1;
                 }                
 			}
@@ -406,7 +406,7 @@ uint32_t BSPIICWriteAndRead(I2C_TypeDef *hi2cx, uint16_t addr, uint8_t *pwstr, u
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-void IICTickHandler(void)   //1ms   ??????
+void IICTickHandler(void)   //1ms   IIC通讯计时
 {
     if((gSHAFEData.IICState == IIC_Sta_Rd_Busy) || (gSHAFEData.IICState == IIC_Sta_Wr_Busy))
     {
@@ -422,9 +422,9 @@ void IICTickHandler(void)   //1ms   ??????
     if((gAccVar.IICState == IIC_Sta_Rd_Busy) || (gAccVar.IICState == IIC_Sta_Wr_Busy))
     {
         gACC_IIC_COMM_TIME++;
-        if(gACC_IIC_COMM_TIME >=100)
+        if(gACC_IIC_COMM_TIME >=50)
         {
-            gACC_IIC_COMM_TIME = 100;
+            gACC_IIC_COMM_TIME = 50;
             gAccVar.IICState = IIC_Sta_ERR;
         }
     }    

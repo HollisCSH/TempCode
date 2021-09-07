@@ -1306,7 +1306,7 @@ static u8 mb_data_PreDsgTemp_r(uint16_t mbaddr,uint16_t *data)
     return TRUE;      
 }
 
-//读地址361    预放电电阻温度
+//读地址361    发生容量校准时的循环次数
 static u8 mb_data_CalibCyc_r(uint16_t mbaddr,uint16_t *data)
 {
     (void)mbaddr;

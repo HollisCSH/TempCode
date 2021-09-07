@@ -479,7 +479,7 @@ void MOSCtrlMOSFaultCheck()
     {
         if((gTimer1ms - gMCData.fault_timer2) >= 2000)
         {
-            if((gBatteryInfo.Data.Curr > -5) && (gSampleData.PreVolt < 100))//放电电流小于50mA，并且预放检测电路电压小于40mV
+            if((gBatteryInfo.Data.Curr > -5) && (gSampleData.PreVolt < 50))//放电电流小于50mA，并且预放检测电路电压小于50mV
             {
                 gMCData.fault_timer2 = gTimer1ms - 2000;
             }
@@ -487,8 +487,7 @@ void MOSCtrlMOSFaultCheck()
             {
                 if((gTimer1ms - gMCData.fault_timer2) >= 4000)
                 {
-                    //增加实际打开预放判断
-                    if((gSampleData.PreVolt >= 40) && BITGET(gBatteryInfo.Status.IOStatus,2))//预放支路预放检测电路损坏
+                    if((gSampleData.PreVolt >= 50))//预放支路预放检测电路损坏
                     {
                         gMCData.mos_fault |= PDS_MASK;//预放电路损坏
                     }

@@ -29,6 +29,7 @@
 #include "DataDeal.h"
 #include "pt.h"
 #include "DTCheck.h"
+#include "string.h"
 
 #ifdef DEBUG
 #include "BSP_UART.h"
@@ -38,6 +39,7 @@
 //全局变量定义
 //=============================================================================================
 u8	gSH367309Readbuff[SH367309_READBUFF_LEN] = {0};     //SH367309接收缓冲数组
+u8	gSH367309CalCrcbuff[SH367309_READBUFF_LEN] = {0};   //SH367309计算Crc缓冲数组
 u8	gSH367309Writebuff[SH367309_WRITEBUFF_LEN] = {0};  	//SH367309发送缓冲数组
 u8  gSHAFEWritebuff[10] = {0};
 
@@ -164,7 +166,7 @@ static void SH367309ClearData(void)
 //功    能	: 计算数据的CRC
 //注    意	:
 //=============================================================================================
-u8 SH367309CalcCRC(u8 *dataptr, u8 len)
+static u8 SH367309CalcCRC(u8 *dataptr, u8 len)
 {
     u8 crc8 = 0;    
     
@@ -175,6 +177,33 @@ u8 SH367309CalcCRC(u8 *dataptr, u8 len)
     } 
        
     return(crc8);       
+}
+
+//=============================================================================================
+//函数名称	: static u8 SH367309ReadDataCRCCheck(u8 len)
+//函数参数	: len：读取的数据数组长度
+//输出参数	:
+//静态变量	:
+//功    能	: 计算数据的CRC校验，成功返回1，不成功返回0
+//注    意	:
+//=============================================================================================
+static u8 SH367309ReadDataCRCCheck(u8 len)
+{
+    u8 CheckRes = 0;
+    
+    if(False == gSHAFEData.IsIICRead)
+        return True;
+    
+    //TWI渎操作的数据长度可通过主机设置，CRC8会从起始位之后的数据开始校验，
+    //包括从机地址（含读，写位），寄存器地址、 所读取的数据长度N、以及重复开始条件之后的从机地址（含读/写位）
+    //读的数据长度 + 4
+    memcpy(&gSH367309CalCrcbuff[4],gSH367309Readbuff,len);
+    CheckRes = (gSH367309Readbuff[len] == SH367309CalcCRC(gSH367309CalCrcbuff, len + 4));
+    
+    if(True == CheckRes && gSHAFEData.pStructData != ((u32)(&gSH367309Readbuff[0])))
+        memcpy((u8 *)gSHAFEData.pStructData,gSH367309Readbuff,len);
+    
+    return CheckRes;
 }
 
 //=============================================================================================
@@ -195,7 +224,7 @@ u8 SH367309WriteRegister(I2C_TypeDef *hi2cx, u8 regaddr,u8* p_buffer)
 	{
 		return SH367309_IIC_FAULT_STAT;
 	}
-
+    gSHAFEData.IsIICRead = False;
 	deviceaddr = SH367309_WRITE_ADDR;
 	regaddress = (u8)(regaddr);
 
@@ -225,7 +254,7 @@ u8 SH367309WriteRegister(I2C_TypeDef *hi2cx, u8 regaddr,u8* p_buffer)
 //功	能	: SH367309读取信息函数.阻塞等待
 //注	意	:
 //=============================================================================================
-u8 SH367309ReadNRegisters(I2C_TypeDef *hi2cx , u8* p_buffer, u8 bufflen, u8 regaddr)
+u8 SH367309ReadNRegisters(I2C_TypeDef *hi2cx , u8* p_buffer, u8 bufflen, u8 regaddr,u8 *crclen ,u32 *pData)
 {
 	u8 errstat = 0;			//IIC通信错误信息
 	u16 regaddress = 0;	//寄存器地址
@@ -234,16 +263,26 @@ u8 SH367309ReadNRegisters(I2C_TypeDef *hi2cx , u8* p_buffer, u8 bufflen, u8 rega
 	{
 		return SH367309_IIC_FAULT_STAT;
 	}
-
+    
+    gSHAFEData.IsIICRead = True;
 	regaddress = (u8)regaddr;
+         
+    gSH367309CalCrcbuff[0] = SH367309_WRITE_ADDR;
+    gSH367309CalCrcbuff[1] = regaddress;
+    gSH367309CalCrcbuff[2] = bufflen;
+    gSH367309CalCrcbuff[3] = SH367309_READ_ADDR;
     
     gSH367309Writebuff[0] = regaddress;
-    gSH367309Writebuff[1] = bufflen;    
+    gSH367309Writebuff[1] = bufflen;   //SH367309有带一位CRC 将CRC读出
     regaddress = (((u16)gSH367309Writebuff[0])<<8) | ((u16)gSH367309Writebuff[1]);
-		//errstat = BSPIICRcvMsg(num,SH367309_WRITE_ADDR,regaddress,p_buffer,bufflen * 2,0);	//发送读取报文，标准地址
-    //BSPIICWriteAndRead(gSHAFEData.afechn,SH367309_WRITE_ADDR,&gSH367309Writebuff[0],2,p_buffer,bufflen+1); 
-    BSPIICWriteAndRead(SH367309_IIC_CHANNEL,SH367309_WRITE_ADDR,&gSH367309Writebuff[0],2,p_buffer,bufflen); 
-		//BSP_I2C_MEM_REAR(SH367309_IIC_CHANNEL,regaddress,p_buffer,bufflen+1); 
+	//errstat = BSPIICRcvMsg(num,SH367309_WRITE_ADDR,regaddress,p_buffer,bufflen * 2,0);	//发送读取报文，标准地址
+    //BSPIICWriteAndRead(gSHAFEData.afechn,SH367309_WRITE_ADDR,&gSH367309Writebuff[0],2,p_buffer,bufflen+1);   
+    
+    *crclen = bufflen;
+    if(pData && p_buffer)
+        *pData = (u32)(&p_buffer[0]);   //读取的IIC数据后，将iic数据复制到pData指针指向的结构体或者数组
+    BSPIICWriteAndRead(SH367309_IIC_CHANNEL,SH367309_WRITE_ADDR,&gSH367309Writebuff[0],2,gSH367309Readbuff,bufflen+1); 
+	//BSP_I2C_MEM_REAR(SH367309_IIC_CHANNEL,regaddress,p_buffer,bufflen+1); 
     
 	return errstat;
 }
@@ -686,7 +725,7 @@ u8 SH367309OCD1Config(u16 ocd1value)
         index = SH367309_EEP_OCD1V_200MV;
     }
         
-    #if defined(LFP_HL_25000MAH_16S)
+    #if defined(LFP_HL_25000MAH_16S) || defined(LFP_GF_25000MAH_16S)
     gSHAfeEep.OCD1.OCD1Bit.OCD1V = index;
     gSHAfeEep.OCD1.OCD1Bit.OCD1T = SH367309_EEP_OCD1T_DLY_1S;    
     #else
@@ -716,7 +755,7 @@ u8 SH367309OCD2Config(u16 ocd2value)
         index = SH367309_EEP_OCD2V_500MV;
     }
         
-    #if defined(LFP_HL_25000MAH_16S)
+    #if defined(LFP_HL_25000MAH_16S) || defined(LFP_GF_25000MAH_16S)
     gSHAfeEep.OCD2.OCD2Bit.OCD2V = index;
     gSHAfeEep.OCD2.OCD2Bit.OCD2T = SH367309_EEP_OCD2T_DLY_200MS;    
     #else
@@ -1020,8 +1059,8 @@ static void SH367309ConfigInitTask(void)
         
         
         case 3:    
-            gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,(u8 *)&gSHAfeEepRead,\
-                                                            sizeof(t_SH367309_EEPRom),SH367309_EEP_SCONF1);
+            gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,(u8 *)&gSHAfeEepRead,sizeof(t_SH367309_EEPRom),
+                                                       SH367309_EEP_SCONF1,&gSHAFEData.CalCrcLen,&gSHAFEData.pStructData);
             slaststep = sstep;
             sstep = 0xaa;
             BSPTaskStart(TASK_ID_SH367309_TASK, 2);            
@@ -1179,7 +1218,7 @@ static void SH367309ConfigInitTask(void)
         case 10:
             //再读一次配置参数
             gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,(u8 *)&gSHAfeEepRead,\
-                                                            sizeof(t_SH367309_EEPRom),SH367309_EEP_SCONF1);
+                                                            sizeof(t_SH367309_EEPRom),SH367309_EEP_SCONF1,&gSHAFEData.CalCrcLen,&gSHAFEData.pStructData);
             slaststep = sstep;
             sstep = 0xaa;
             BSPTaskStart(TASK_ID_SH367309_TASK, 2);            
@@ -1236,7 +1275,7 @@ static void SH367309ConfigInitTask(void)
         case 0xaa:
             if(BSPIIC_StateGet( SH367309_IIC_CHANNEL ) <= 0)
             {
-                if(BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0)      
+                if(BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0 || False == SH367309ReadDataCRCCheck(gSHAFEData.CalCrcLen))   
                 {
                     result = SH367309_IIC_FAULT_STAT; 
                     sstep = 0xbb; //错误处理步骤
@@ -1359,12 +1398,12 @@ static void SH367309NormalTask(void)
         gSHAFEData.IntFlg = False;
         
         //读取AFE STATUS标志
-        gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,
-                                                    (u8 *)&gSHAFEReg.BSTATUS1.BSTATUS1Byte,1,SH367309_REG_BSTATUS1);  
+        gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,(u8 *)&gSHAFEReg.BSTATUS1.BSTATUS1Byte,1,
+                                                    SH367309_REG_BSTATUS1,&gSHAFEData.CalCrcLen,&gSHAFEData.pStructData);
         
         PT_WAIT_UNTIL(&gPTSH367309Norm,BSPTaskStart(TASK_ID_SH367309_TASK, 2) && (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) <= 0));
         
-        if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0))      
+        if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0) || (False == SH367309ReadDataCRCCheck(gSHAFEData.CalCrcLen))) 
         {
             gSHAFEData.iicerr ++;
         }            
@@ -1393,12 +1432,12 @@ static void SH367309NormalTask(void)
         }        
         
         //读取AFE BFLAG标志
-        gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,
-                                                    (u8 *)&gSHAFEReg.BFLAG1.BFLAG1Byte,2,SH367309_REG_BFLAG1);
+        gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,(u8 *)&gSHAFEReg.BFLAG1.BFLAG1Byte,2,
+                                                    SH367309_REG_BFLAG1,&gSHAFEData.CalCrcLen,&gSHAFEData.pStructData);
         
         PT_WAIT_UNTIL(&gPTSH367309Norm,BSPTaskStart(TASK_ID_SH367309_TASK, 2) && (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) <= 0));
         
-        if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0))      
+        if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0) || (False == SH367309ReadDataCRCCheck(gSHAFEData.CalCrcLen)))  
         {
             gSHAFEData.iicerr ++;
         }            
@@ -1416,12 +1455,12 @@ static void SH367309NormalTask(void)
         if(gSHAFEReg.BFLAG2.BFLAG2Bit.CADC_FLG)
         {
             //读CADC电流
-            gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,
-                                                    (u8 *)gSH367309Readbuff,2,SH367309_REG_ADC2);
+            gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,(u8 *)gSH367309Readbuff,2,
+                                                    SH367309_REG_ADC2,&gSHAFEData.CalCrcLen,&gSHAFEData.pStructData);
             
             PT_WAIT_UNTIL(&gPTSH367309Norm,BSPTaskStart(TASK_ID_SH367309_TASK, 2) && (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) <= 0));
             
-            if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0))      
+            if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0) || (False == SH367309ReadDataCRCCheck(gSHAFEData.CalCrcLen)))  
             {
                 gSHAFEData.iicerr ++;
             }            
@@ -1533,11 +1572,12 @@ static void SH367309NormalTask(void)
     //采样
     if(gSHAFECtrl.eventctrl & SH367309_EVE_CTRL_SMP)
     {
-        gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,(u8 *)&gSHAFEReg,sizeof(gSHAFEReg),SH367309_REG_CONF);
+        gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,(u8 *)&gSHAFEReg,sizeof(gSHAFEReg),SH367309_REG_CONF,
+                                                                                &gSHAFEData.CalCrcLen,&gSHAFEData.pStructData);
         
         PT_WAIT_UNTIL(&gPTSH367309Norm,BSPTaskStart(TASK_ID_SH367309_TASK, 2) && (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) <= 0));
         
-        if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0))      
+        if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0) || (False == SH367309ReadDataCRCCheck(gSHAFEData.CalCrcLen)))      
         {
             gSHAFEData.iicerr ++;
         }            
@@ -1564,12 +1604,12 @@ static void SH367309NormalTask(void)
                 BITCLR(gSHAFEData.mosstatus,1);
             }
             //读取AFE STATUS标志
-            gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,
-                                                        (u8 *)&gSHAFEReg.BSTATUS1.BSTATUS1Byte,1,SH367309_REG_BSTATUS1);  
+            gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,(u8 *)&gSHAFEReg.BSTATUS1.BSTATUS1Byte,1,
+                                                        SH367309_REG_BSTATUS1,&gSHAFEData.CalCrcLen,&gSHAFEData.pStructData); 
             
             PT_WAIT_UNTIL(&gPTSH367309Norm,BSPTaskStart(TASK_ID_SH367309_TASK, 2) && (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) <= 0));
             
-            if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0))      
+            if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0) || (False == SH367309ReadDataCRCCheck(gSHAFEData.CalCrcLen)))   
             {
                 gSHAFEData.iicerr ++;
             }            
@@ -1598,12 +1638,12 @@ static void SH367309NormalTask(void)
             }        
             
             //读取AFE BFLAG标志
-            gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,
-                                                        (u8 *)&gSHAFEReg.BFLAG1.BFLAG1Byte,2,SH367309_REG_BFLAG1);
+            gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,(u8 *)&gSHAFEReg.BFLAG1.BFLAG1Byte,2,
+                                                        SH367309_REG_BFLAG1,&gSHAFEData.CalCrcLen,&gSHAFEData.pStructData); 
             
             PT_WAIT_UNTIL(&gPTSH367309Norm,BSPTaskStart(TASK_ID_SH367309_TASK, 2) && (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) <= 0));
             
-            if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0))      
+            if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0) || (False == SH367309ReadDataCRCCheck(gSHAFEData.CalCrcLen))) 
             {
                 gSHAFEData.iicerr ++;
             }            
@@ -1643,7 +1683,7 @@ static void SH367309NormalTask(void)
             DataDealSetBMSDataRdy(e_AFERdy); 
             //
             DataDealSetBMSDataRdy(e_FuelRdy);  
-//            BSPTaskStart(TASK_ID_SAMPLE_TASK, 5);
+            BSPTaskStart(TASK_ID_SAMPLE_TASK, 5);
 //            _UN_NB_Printf("ADC start %d \r\n",HAL_GetTick());             
         }
 
@@ -1702,8 +1742,8 @@ static void SH367309NormalTask(void)
             s16 ttmp;
            
             //读CADC电流
-            gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,
-                                                    (u8 *)&gSHAFEReg.CADCCurrH,2,SH367309_REG_ADC2);            
+            gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,(u8 *)&gSHAFEReg.CADCCurrH,2,
+                                                    SH367309_REG_ADC2,&gSHAFEData.CalCrcLen,&gSHAFEData.pStructData);           
             
             gSHAFEData.curradval = (s32)(s16)((((u16)gSHAFEReg.CADCCurrH)<<8)|(gSHAFEReg.CADCCurrL));
             
@@ -1725,8 +1765,8 @@ static void SH367309NormalTask(void)
         else if(0 == gSHAFECfg.calcurr)
         {
             //读CADC电流
-            gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,
-                                                    (u8 *)&gSHAFEReg.CADCCurrH,2,SH367309_REG_ADC2);            
+            gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,(u8 *)&gSHAFEReg.CADCCurrH,2,
+                                                    SH367309_REG_ADC2,&gSHAFEData.CalCrcLen,&gSHAFEData.pStructData);           
             
             gSHAFEData.curradval = (s32)(s16)((((u16)gSHAFEReg.CADCCurrH)<<8)|(gSHAFEReg.CADCCurrL));
             
@@ -1762,6 +1802,8 @@ static void SH367309NormalTask(void)
             }    
             else
             {
+                if(gSHAFEData.iicerr > 0)
+                    gSHAFEData.iicerr --;                
                 //控制成功
                 //延时35ms
                 PT_WAIT_UNTIL(&gPTSH367309Norm,BSPTaskStart(TASK_ID_SH367309_TASK, 2) 
@@ -1771,11 +1813,11 @@ static void SH367309NormalTask(void)
 
         //计算出实际的使用值
         gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,(u8 *)&gSHAfeEepRead.OVH,\
-                                          (SH367309_EEP_UVR - SH367309_EEP_OVH + 1),SH367309_EEP_OVH);
+                                          (SH367309_EEP_UVR - SH367309_EEP_OVH + 1),SH367309_EEP_OVH,&gSHAFEData.CalCrcLen,&gSHAFEData.pStructData); 
 
         PT_WAIT_UNTIL(&gPTSH367309Norm,BSPTaskStart(TASK_ID_SH367309_TASK, 2) && (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) <= 0));
             
-        if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0))      
+        if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0) || (False == SH367309ReadDataCRCCheck(gSHAFEData.CalCrcLen))) 
         {
             gSHAFEData.iicerr ++;
         }    
@@ -1870,11 +1912,11 @@ static void SH367309NormalTask(void)
 
         //计算出实际的使用值				BSPIIC_StateGet( DA213_IIC_CHANNEL )
         gSHAFEData.iicres = SH367309ReadNRegisters(SH367309_IIC_CHANNEL,(u8 *)&gSHAfeEepRead.OCD1.OCD1Byte,\
-                                          (SH367309_EEP_OCC - SH367309_EEP_OCD1 + 1),SH367309_EEP_OCD1);
+                                          (SH367309_EEP_OCC - SH367309_EEP_OCD1 + 1),SH367309_EEP_OCD1,&gSHAFEData.CalCrcLen,&gSHAFEData.pStructData); 
 
         PT_WAIT_UNTIL(&gPTSH367309Norm,BSPTaskStart(TASK_ID_SH367309_TASK, 2) && (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) <= 0));
             
-        if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0))      
+        if((gSHAFEData.iicres > 0) || (BSPIIC_StateGet( SH367309_IIC_CHANNEL ) < 0) || (False == SH367309ReadDataCRCCheck(gSHAFEData.CalCrcLen)))
         {
             gSHAFEData.iicerr ++;
         }    

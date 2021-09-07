@@ -312,6 +312,7 @@ void Sim_ShutDown()
 	g_pSimCard->isSimSleep = True;
 	g_pGps->isPowerOn = False;
 	g_pSimCard->isCommOk = False;
+    g_pSimCard->isAlwaysCommOk = False;
 	g_pGprs->isSyncTime = False;
     g_pSimCard->isSimStartOK = Sim_Wake_Init;
 }
@@ -327,7 +328,8 @@ void Sim_RxByte(uint8 data)
 		{
 			//Printf("Sim power on\n");
 		}
-		g_pSimCard->isCommOk = TRUE;	
+		g_pSimCard->isCommOk = TRUE;
+        g_pSimCard->isAlwaysCommOk = TRUE;        
 	}
 }
 
@@ -547,7 +549,16 @@ Bool Sim_SendCmdItem(const AtCmdItem* pCmd)
 	{
 		g_pSimCard->SendCmdItem(pCmd, buff, &delay);
 	}
-
+	else if(CMD_CFUN_CLOSE == pCmd->cmdInd)
+	{
+		delay = 10000;    //等待时间
+ 	}
+	else if(CMD_CFUN_OPEN == pCmd->cmdInd)
+	{
+        //等待基站定位
+		delay = 10000;    //等待时间
+ 	}     
+    
 	return AtCmdCtrl_AnsySend(g_pSimAtCmdCtrl, buff, pCmd->atAck, delay, (uint32)pCmd);
 }
 

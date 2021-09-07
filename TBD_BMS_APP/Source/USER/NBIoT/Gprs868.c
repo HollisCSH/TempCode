@@ -42,6 +42,21 @@ ATCMD_RC Gprs_RspATE0(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
     }
 }
 
+//Cfun关闭注册网络处理
+ATCMD_RC Gprs_RspCfun(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
+{
+    if(state == AT_SPECIFIED_OK)
+	{
+        //延时
+        Gprs_DelaySendCmdInd(CMD_CFUN_OPEN, 4);
+        return ATCRC_DONE;
+    }
+    else
+    {
+        return ATCRC_RESEND;
+    }
+}
+
 //设置发送接收格式
 ATCMD_RC Gprs_Rsp_SET_FORMAT(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
 {
@@ -72,6 +87,7 @@ ATCMD_RC Gprs_RspCSQ(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
 {
 	ATCMD_RC nRet = ATCRC_DONE;
 	int value = 0;
+    static u8 RstTim = 0;
 	
 	//启动10定时器, 检测连接状态
 	if(state == AT_SPECIFIED_OK)
@@ -83,10 +99,24 @@ ATCMD_RC Gprs_RspCSQ(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
         gGSMCond.gsmcsq = value;
 		if(value <= 0)
 		{
+            RstTim++;
+            if(RstTim > 3)
+            {
+                RstTim = 0;
+               Sim_PowerReset(SIM_CONNECT_ERROR);
+                return ATCRC_DONE;
+            }
+            
             //5S后重新查询CSQ值
+            if(g_pGprs->isSendWifiMac == True)
+                g_pGprs->isSendWifiMac = False;
 			Gprs_DelaySendCmdInd(CMD_CSQ, 5);
 			return ATCRC_DONE;
 		}
+        else
+        {
+            RstTim = 0;
+        }
 	}
 	else
 	{
@@ -95,7 +125,8 @@ ATCMD_RC Gprs_RspCSQ(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
 		if(state == AT_TIMEOUT)
 		{
             //响应超时，可能是SIM休眠导致的，关闭休眠
-			Sim_SyncSendAtCmd("AT+CSCLK=0", Null, 0);
+			Sim_SyncSendAtCmd("AT+QSCLK=0", Null, 0);
+            Sim_PowerReset(SIM_CONNECT_ERROR);
 		}
 #endif	
         
@@ -134,6 +165,7 @@ ATCMD_RC Gprs_RspCSQ(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
 ATCMD_RC Gprs_RspCGATT(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
 {
 	ATCMD_RC nRet = ATCRC_RESEND;
+    static u8 RstTim = 0;
 	
 	if(state == AT_SPECIFIED_OK)
 	{
@@ -146,12 +178,21 @@ ATCMD_RC Gprs_RspCGATT(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
 		if(cgatt == 0)
 		{
             //1S后重新查询信号质量
+            RstTim++;
+            if(RstTim > 10)
+            {
+                RstTim = 0;
+               Sim_PowerReset(SIM_CONNECT_ERROR);
+                return ATCRC_DONE;
+            }     
+            
 			Gprs_DelaySendCmdInd(CMD_CSQ, 1);
 			nRet = ATCRC_DONE;
 		}
         //GPRS 附着状态:1 附着
 		else
 		{
+            RstTim = 0;
 			nRet = ATCRC_SUCCESS;
 			//Printf("GPRS Att Ok.\n");
 		}
@@ -201,10 +242,11 @@ ATCMD_RC Gprs_RspCIPSENDDATA(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCm
 {
 	ATCMD_RC nRet = ATCRC_DONE;
 	UtpFrame* pFrame = (UtpFrame*)&g_pGprs->pTcpPkt[1];
-	
+	static u8 RstTim = 0;
 	
 	if(state == AT_SPECIFIED_OK)
 	{
+        RstTim = 0;
         //心跳包发送成功
 		if(GPRS_HEART_BEAT == pFrame->cmd)
 		{
@@ -273,6 +315,13 @@ ATCMD_RC Gprs_RspCIPSENDDATA(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCm
 	}
 	else
 	{
+        RstTim++;
+        if(RstTim > 3)
+        {
+            RstTim = 0;
+           Sim_PowerReset(SIM_CONNECT_ERROR);
+            return ATCRC_DONE;
+        }        
 		//Printf("Send data failed**************.\n");
 		* pNextAtCmd = Sim_GetCmdByInd(CMD_NETCLOSE);
 		//LOG2(ET_GPRS_SEND_FAILED, Mcu_GetRound5V(), g_pSimCard->csq);
@@ -286,6 +335,7 @@ ATCMD_RC Gprs_RspCREG(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
 {
 	ATCMD_RC nRet = ATCRC_SUCCESS;
 	int value = 0;
+    static u8 RstTim = 0;
 
 	g_pGprs->isReg = False;
 	if(state == AT_SPECIFIED_OK)
@@ -296,6 +346,13 @@ ATCMD_RC Gprs_RspCREG(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
         //未注册； ME 当前没有搜索要注册业务的新运营商
 		if(value == 0)
 		{	
+            RstTim++;
+            if(RstTim > 10)
+            {
+                RstTim = 0;
+               Sim_PowerReset(SIM_CONNECT_ERROR);
+                return ATCRC_DONE;
+            }            
             //发送注册命令
 			Sim_SyncSendAtCmd("AT+CEREG=1", NULL, 100);
 			nRet = ATCRC_RESEND;
@@ -303,6 +360,7 @@ ATCMD_RC Gprs_RspCREG(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
         //已注册：1是本地网，5是漫游网
 		else if((value == 1) || (value == 5))
 		{
+            RstTim = 0;
 			g_pGprs->isReg = True;
 			//Printf("GPRS reg Ok.\n");
 			nRet = ATCRC_SUCCESS;
@@ -364,7 +422,7 @@ ATCMD_RC Gprs_RspCIPOPEN(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
 	else if(state == AT_ERROR)
 	{
 		count++;
-		if(count <= 1) //复位一次
+		if(count >= 3) //复位一次
 		{
 			Sim_PowerReset(SIM_CIPOPEN_ERROR);
 			return ATCRC_DONE;
@@ -377,6 +435,16 @@ ATCMD_RC Gprs_RspCIPOPEN(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
 	}
 	else
 	{
+		count++;
+		if(count >= 3) //复位一次
+		{
+			Sim_PowerReset(SIM_CIPOPEN_ERROR);
+			return ATCRC_DONE;
+		}
+		else
+		{
+			count = 0;
+        }            
         //无响应
 		 nRet = ATCRC_RESEND;
 	}
@@ -633,7 +701,10 @@ ATCMD_RC Dock_RspCSCLK(AtCmdState state, char* pRsp, AtCmdItem** pNextAtCmd)
 		}
 		else
 		{
-            *pNextAtCmd = Sim_GetCmdByInd(CMD_SET_FORMAT);
+            if(gGSMCond.IsPCBTest == True)
+                *pNextAtCmd = Sim_GetCmdByInd(CMD_SET_FORMAT);  //测试模式下直接联网
+            else
+                *pNextAtCmd = Sim_GetCmdByInd(CMD_CFUN_CLOSE);
 //			LOG2(ET_SIM_WAKEUP, g_Settings.devcfg, Mcu_GetRound5V());
 		}
 //		if(WAKEUP_SIM == GetWakeUpType())

@@ -206,7 +206,7 @@ void StorageInit(void)
        #ifdef BMS_ACC_ENABLE   //是否使用加速度传感器
        || (!StorageStringComp((u8 *)&(cConfigInit.accpara),(u8 *)&(gConfigBuff.accpara),sizeof(t_ACC_PARA)))
        #endif 
-       || (!StorageStringComp((u8 *)&(cConfigInit.configadd),(u8 *)(gConfigBuff.configadd),sizeof(t_CONFIG_PARA_ADD))))
+       || (!StorageStringComp((u8 *)&(cConfigInit.configadd),(u8 *)&(gConfigBuff.configadd),sizeof(t_CONFIG_PARA_ADD))))
        && cConfigInit.flag==gConfigBuff.flag)
     {
         gConfigBuff = cConfigInit;
@@ -739,7 +739,7 @@ void StorageMainTask(void *p)
                     }
                     else//由一个区或两个区存在无效数据
                     {
-                        if(cfgwritecnt > 1) //写入2次以上，依然无效
+                        if(cfgwritecnt > 1)                     //写入2次以上，依然无效
                         {
                             cfgwritecnt = 0;
                             gStorageErr = (~areavalid) & 0x03;  //记录故障
@@ -750,7 +750,8 @@ void StorageMainTask(void *p)
                             cfgwritecnt++;
                         }
                         gStorageCTRL |= (FLASH_WR_CFG_MASK);
-                        return; //再走一次写入，校验流程
+                        PT_INIT(&gPTStorage);                   //需要重新擦除
+                        return;                                 //再走一次写入，校验流程
                     }
                 }
 			}
@@ -812,6 +813,7 @@ void StorageMainTask(void *p)
                             userwritecnt++;
                         }
                         gStorageCTRL |= (FLASH_WR_UD_MASK);
+                        PT_INIT(&gPTStorage);               //需要重新擦除
                         return; //再走一次写入，校验流程
                     }
                 }
@@ -908,9 +910,7 @@ void StorageMainTask(void *p)
         if(gStorageCTRL & FLASH_SOC_WR_MASK)
         {
             static u32 socaddr;   //SOC存储flash的地址
-//            static u8 testbuf[64];
-            socaddr = SOC_START_ADDR + gSOC_InfoNum * sizeof(t_SOC_EEP_INFO);  
-            
+            socaddr = SOC_START_ADDR + gSOC_InfoNum * sizeof(t_SOC_EEP_INFO);              
 //            if((socaddr % SECTOR_SIZE) == 0)     //已经写满一个扇区，需要重新擦除
             if(socaddr >= SOC_END_ADDR)
             {
@@ -927,8 +927,6 @@ void StorageMainTask(void *p)
             SocEepRefreshInfo();                                                        //gSocEepInfo刷新数据
             StorageStringCopy(gStorageBuff,(u8 *)&gSocEepInfo, sizeof(gSocEepInfo));	//放入缓冲区中
 			StorageWriteFlashWait(socaddr,(u8 *)gStorageBuff,sizeof(gSocEepInfo));	    //写数据
-//			StorageWriteFlashWait(socaddr,(u8 *)&gSocEepInfo,sizeof(gSocEepInfo));	    //写数据  
-//            StorageReadFlash (socaddr,testbuf,64);
             gSOC_InfoNum++;
             gStorageCTRL &= ~(FLASH_SOC_WR_MASK);
         }

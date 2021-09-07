@@ -41,12 +41,12 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
         PB10     	------> LPUART1_RX		
         PB11    	------> LPUART1_TX		
         */
-        GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11;
+        GPIO_InitStruct.Pin = UART_WIFI_TX_PIN|UART_WIFI_RX_PIN;
         GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
         GPIO_InitStruct.Alternate = GPIO_AF1_LPUART1;
-        HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+        HAL_GPIO_Init(UART_WIFI_PORT, &GPIO_InitStruct);
         HAL_NVIC_SetPriority(UART_WIFI_IRQn, 3, 0);
         HAL_NVIC_EnableIRQ(UART_WIFI_IRQn);
 	} 
@@ -58,12 +58,12 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
         PA9     	------> USART1_TX		PC4
         PA10     	------> USART1_RX		PC5
         */
-        GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5;
+        GPIO_InitStruct.Pin = UART_GPS_RX_PIN|UART_GPS_TX_PIN;
         GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
         GPIO_InitStruct.Alternate = GPIO_AF1_USART1;
-        HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+        HAL_GPIO_Init(UART_GPS_PORT, &GPIO_InitStruct);
         HAL_NVIC_SetPriority(UART_GPS_IRQn, 3, 0);
         HAL_NVIC_EnableIRQ(UART_GPS_IRQn);
     }
@@ -102,8 +102,8 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
         PB10     	------> LPUART1_RX		
         PB11    	------> LPUART1_TX		
         */
-        HAL_GPIO_DeInit(UART_WIFI_RX_PORT, UART_WIFI_RX_PIN);
-        HAL_GPIO_DeInit(UART_WIFI_TX_PORT, UART_WIFI_TX_PIN);
+        HAL_GPIO_DeInit(UART_WIFI_PORT, UART_WIFI_RX_PIN);
+        HAL_GPIO_DeInit(UART_WIFI_PORT, UART_WIFI_TX_PIN);
     }
     else if(huart->Instance==UART_GPS)
     {
@@ -113,8 +113,8 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
         PA9     	------> USART1_TX		PC4
         PA10     	------> USART1_RX		PC5
         */
-        HAL_GPIO_DeInit(UART_GPS_RX_PORT, UART_GPS_RX_PIN);
-        HAL_GPIO_DeInit(UART_GPS_TX_PORT, UART_GPS_TX_PIN);
+        HAL_GPIO_DeInit(UART_GPS_PORT, UART_GPS_RX_PIN);
+        HAL_GPIO_DeInit(UART_GPS_PORT, UART_GPS_TX_PIN);
     } 
 }
 

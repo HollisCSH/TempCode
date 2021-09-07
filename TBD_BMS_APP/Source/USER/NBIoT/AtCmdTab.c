@@ -35,6 +35,9 @@ const AtCmdItem g_GprsCmdTbl[] =
 {
 //	 {CMD_RESET 	, "AT+QRST=1" 	, AT_OK, Gprs_RspReset}             //复位
 	 {CMD_ATE 		, "ATE0" 		, AT_OK		    , Gprs_RspATE0}     //关闭回显
+	,{CMD_CFUN_CLOSE, "AT+CFUN=0" 		, AT_OK		, Gprs_RspCfun}     //关闭注册网络
+	,{CMD_QCSEARFCN , "AT+QCSEARFCN" 	, AT_OK		, Null}     //清除记忆频点，清除后，需要至少15秒，才能重新联网
+	,{CMD_CFUN_OPEN , "AT+CFUN=1" 		, AT_OK		, Null}     //打开注册网络
     ,{CMD_SET_FORMAT, "AT+QICFG=\"dataformat\",1,1" , AT_OK		, Gprs_Rsp_SET_FORMAT} //配置发送的数据格式为十六进制字符串(<send_data_format>=0)
     
     //SIM 短信SMS
@@ -63,7 +66,7 @@ const AtCmdItem g_GprsCmdTbl[] =
 //	,{CMD_CIICR		, "AT+CIICR"	, AT_OK		, Null}                 //建立无线链路（激活移动场景）
 //	,{CMD_CIFSR		, "AT+CIFSR"	, "."		, Null}                 //获取本地 IP 地址
     
-	,{CMD_CIPOPEN 	, "AT+QIOPEN=0,0,\"TCP\",\"%s\",%d"	, AT_OK, Gprs_RspCIPOPEN}  	//建立 TCP 连接
+	,{CMD_CIPOPEN 	, "AT+QIOPEN=0,0,\"TCP\",\"%s\",%d,0,1"	, AT_OK, Gprs_RspCIPOPEN}  	//建立 TCP 连接
 	,{CMD_CIPSEND 	, "AT+QISEND=0,%d,\"%s\""	, "\r\nSEND OK\r\n"	, Gprs_RspCIPSENDDATA}      //发送数据到服务器
 //	,{CMD_CIPSENDDATA, ""			, "\r\nSEND OK\r\n"	, Gprs_RspCIPSENDDATA}  //代表数据发送成功
 	
@@ -113,7 +116,7 @@ const AtReqItem g_SimReq[] =
 {
 	 {"+QIURC: \"recv\",0,"		, Gprs_CmdIpData}	//NB-IOT 接收服务器的TCP数据处理，+QIURC: "recv",0,3,"012"
 	
-	,{"+CPIN: NOT"		, Gprs_CmdSimCardEvent}	    //NB-IOT SIM CARD IS PLUT OUT
+//	,{"+CPIN: NOT"		, Gprs_CmdSimCardEvent}	    //NB-IOT SIM CARD IS PLUT OUT
 	,{"\r\n+QIOPEN:"		, Gprs_CmdConnect}      //NB-IOT 网络连接ok
 	,{"+PDP: DEACT"		, Gprs_CmdPdpDeact}         //标识 GPRS 被网络释放， 此时仍然需要执行 AT+CIPSHUT 来改变状态。
 	,{"+QIURC: \"closed\"", Gprs_CmdClosed}         //NB-IOT TCP连接关闭，需要重新连接服务器

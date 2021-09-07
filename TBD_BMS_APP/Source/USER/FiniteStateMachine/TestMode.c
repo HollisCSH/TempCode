@@ -509,7 +509,7 @@ void TestModeSleepTest2(t_PCBATEST *d)
 //=============================================================================================
 void TestModeEvenBalTest(t_PCBATEST *d)
 {
-    #if defined(LFP_TB_20000MAH_20S) || defined(SY_PB_32000MAH_17S)
+    #if defined(LFP_TB_20000MAH_20S) || defined(LFP_PH_20000MAH_20S) || defined(SY_PB_32000MAH_17S)
     uint16_t dat;
     PT_BEGIN(d);
     d->result = 0;
@@ -574,7 +574,7 @@ void TestModeEvenBalTest(t_PCBATEST *d)
 //=============================================================================================
 void TestModeOddBalTest(t_PCBATEST *d)
 {
-    #if defined(LFP_TB_20000MAH_20S) || defined(SY_PB_32000MAH_17S)
+    #if defined(LFP_TB_20000MAH_20S) || defined(LFP_PH_20000MAH_20S) || defined(SY_PB_32000MAH_17S)
     uint16_t dat;
     PT_BEGIN(d);
     d->result = 0;

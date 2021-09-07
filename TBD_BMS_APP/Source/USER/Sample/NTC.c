@@ -137,7 +137,7 @@ const t_NTCTAB NTC_RESTAB[]=
 {
     {NTC_103KT1608T_RESTAB, 160, -400},   //B=3435, -40℃ - 120℃
     
-    #if defined(LFP_TB_20000MAH_20S)
+    #if defined(LFP_TB_20000MAH_20S) || defined(LFP_PH_20000MAH_20S)
     //tb 贴片
     {NTC_SMT_NTC0603, 160, -400},   //B=3435, -40℃ - 125℃
     {NTC_TB_WD_NTC, 160, -400},     //B=3435, -40℃ - 120℃    
@@ -211,7 +211,7 @@ unsigned long NTCFindResByTemp(s16 temp)
     
     index = (temp + 400) / 10;
     
-    #if defined(LFP_TB_20000MAH_20S)
+    #if defined(LFP_TB_20000MAH_20S) || defined(LFP_PH_20000MAH_20S)
     return NTC_TB_WD_NTC[index];
     #else
     return NTC_103KT1608T_RESTAB[index];

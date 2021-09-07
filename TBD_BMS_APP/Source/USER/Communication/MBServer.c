@@ -1082,6 +1082,9 @@ static u8 MBServerFuncCode200ProcEx(t_Modbus_PDU *PmbRxMsg,t_Modbus_PDU *PmbTxMs
         gStructCanReq.SendFlag.SendFlagBit.IsSendReq = True;
         PmbTxMsg->data[0] = (u8)(gStructCanReq.RxCanId >> 8);
         *pdulen = 1;
+        gStructCanReq.RxCanId = FlexCanChangeRx3Canid(0xFF);
+        gStructCanReq.TxCanId = VARI_TX_ID;
+//        gStructCanReq.TxCanId = TX_MSG_ID3;
     }
     else
     {

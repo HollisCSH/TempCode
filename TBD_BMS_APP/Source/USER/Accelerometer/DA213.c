@@ -232,23 +232,23 @@ u8 DA213WriteNRegisters(I2C_TypeDef *hi2cx, u8 regaddr,u8* p_buffer, u8 bufflen)
 //=============================================================================================
 u8 DA213ReadNRegisters(I2C_TypeDef *hi2cx,u16 regaddr,u8* p_buffer, u8 bufflen)
 {
-	 u8 errstat = 0;	//IIC通信错误信息
-	 u8 regaddress = 0;
+    u8 errstat = 0;	//IIC通信错误信息
+    u8 regaddress = 0;
 
-	 //if((num > eIIC1) || (bufflen > DA213_READBUFF_LEN) || (p_buffer == NULL))  //参数有效性判断
-	 if((hi2cx != DA213_IIC_CHANNEL) || (bufflen > DA213_READBUFF_LEN) || (p_buffer == NULL))  //参数有效性判断
-	 {
-		 return DA213_IIC_FAULT_STAT;
-	 }
+    //if((num > eIIC1) || (bufflen > DA213_READBUFF_LEN) || (p_buffer == NULL))  //参数有效性判断
+    if((hi2cx != DA213_IIC_CHANNEL) || (bufflen > DA213_READBUFF_LEN) || (p_buffer == NULL))  //参数有效性判断
+    {
+     return DA213_IIC_FAULT_STAT;
+    }
 
-	 regaddress = (u8)regaddr;
-   gACCWritebuff[0] = regaddress;
-	 //errstat = BSPIICRcvMsg(num,DA213_WRITE_ADDR,regaddress,p_buffer,bufflen,1);	//发送读取报文，标准地址
-     
-   //BSPIICWriteAndRead(gAccVar.accchn,DA213_WRITE_ADDR,gACCWritebuff,1,p_buffer,bufflen);
-	 errstat = BSP_I2C_MEM_REAR(DA213_IIC_CHANNEL , gACCWritebuff[0] , p_buffer, bufflen);
-     
-	 return errstat; 
+    regaddress = (u8)regaddr;
+    gACCWritebuff[0] = regaddress;
+    //errstat = BSPIICRcvMsg(num,DA213_WRITE_ADDR,regaddress,p_buffer,bufflen,1);	//发送读取报文，标准地址
+
+    //BSPIICWriteAndRead(gAccVar.accchn,DA213_WRITE_ADDR,gACCWritebuff,1,p_buffer,bufflen);
+    errstat = BSP_I2C_MEM_REAR(DA213_IIC_CHANNEL , gACCWritebuff[0] , p_buffer, bufflen);
+
+    return errstat; 
 }
 
 //=============================================================================================
@@ -397,7 +397,7 @@ void DA213InitTask(void)
     PT_BEGIN(&gPTDA213Init);
      
     //INT_SYS_DisableIRQ(PORT_IRQn); 
-		HAL_NVIC_DisableIRQ( EXTI4_15_IRQn );	//加速度计的中断为于 PB8 和 PC10
+    HAL_NVIC_DisableIRQ( EXTI4_15_IRQn );	//加速度计的中断为于 PB8 和 PC10
     /****************************************复位**********************************************/    
     //避免复位引起的中断
     gDA213Writebuff[0] = 0x24;
@@ -1462,7 +1462,7 @@ void DA213NormalTask(void)
 #endif    
 
     
-    if(gAccVar.IICErr >= 3 && gAccVar.IICErr < 6)	//出现通信故障
+    if(gAccVar.IICErr >= 2 && gAccVar.IICErr < 5)	//出现通信故障
 	{
         //IIC解锁
         /*
@@ -1472,7 +1472,7 @@ void DA213NormalTask(void)
         BSPI2C_DeInit(DA213_IIC_CHANNEL);
         BSPI2C_Init(DA213_IIC_CHANNEL);
 	}    
-	else if(gAccVar.IICErr >= 6)	//出现断线故障
+	else if(gAccVar.IICErr >= 5)	//出现断线故障
 	{
 		gAccVar.RunStat = ACC_Sta_Offline;
 	}

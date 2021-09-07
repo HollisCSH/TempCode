@@ -85,7 +85,7 @@ extern "C"{
 //	#define IP_PORT_TEST 	 41191
 	#define IP_ADDR_TEST 	 "test-ehd-battery-netty.ehuandian.net"
 	#define IP_PORT_TEST 	 9005
-    #elif defined(LFP_TB_20000MAH_20S)
+    #elif defined(LFP_TB_20000MAH_20S) || defined(LFP_PH_20000MAH_20S)
     #define IP_ADDR_TEST 	 "test-ehd-battery-netty.ehuandian.net"
 	#define IP_PORT_TEST 	 9005
     #else
