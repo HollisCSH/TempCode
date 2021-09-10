@@ -428,7 +428,7 @@ void IOCheckMainTask(void)
 		{
 			// add ...
 			//BSPGPIOClrPin(MODULE_VCC_CTR_PORT,MODULE_VCC_CTR_PIN);  //关闭外置模块电源
-        HAL_GPIO_WritePin(VCC_MODULE_PORT , VCC_MODULE_PIN , GPIO_PIN_RESET);  //关闭外置模块电源    
+            HAL_GPIO_WritePin(VCC_MODULE_PORT , VCC_MODULE_PIN , GPIO_PIN_RESET);  //关闭外置模块电源    
             //关闭充放电管
             gMBCtrl.ctrl &= 0xFFF0;
 		}

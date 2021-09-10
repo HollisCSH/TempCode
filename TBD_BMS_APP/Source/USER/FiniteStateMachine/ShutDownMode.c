@@ -229,7 +229,7 @@ void ShutDownModeCheck(void)
       )
     {
         idletimer = 0;
-        gSHDNCond.IdleFlag.IdleFlagBit.EnterLightSleep = True;
+        gSHDNCond.IdleFlag.IdleFlagBit.EnterLightSleep = False;
         gSHDNCond.IdleFlag.IdleFlagBit.EnterShutDown = False;        
         gSHDNCond.cond |= SHDN_COND_COMM_MASK;
     }

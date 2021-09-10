@@ -27,7 +27,7 @@ IWDG_HandleTypeDef hiwdg;
   * 返 回 值: 无
   * 说    明：函数调用举例：Counter Reload Value = (LsiFreq(Hz) * Timeout(ms)) / (prescaler * 1000)   
   *           IWDG_Config(IWDG_Prescaler_32 ,1000);  // IWDG 1s 超时溢出 =(32000 * 1000) / (32 * 1000)
-	*						时钟非标准32K  所以计算值只是大约值
+  *			  时钟非标准32K  所以计算值只是大约值
   */
 //  #define DEBUG
 void MX_IWDG_Init(uint32_t rlv)

@@ -270,7 +270,11 @@ void SOPCalcTask(void)
         }    
         
  		if(((chgtime >= TAPER_CURR_TIME) 
-            &&(SOPGetBatMinVolt() >= (MAX_CHG_VOLT - 10)))) 
+            &&(SOPGetBatMinVolt() >= (MAX_CHG_VOLT - 10)))
+            #if defined(SY_PB_32000MAH_14S) || defined(SY_PB_32000MAH_16S) || defined(SY_PB_32000MAH_17S)
+            && (gBatteryInfo.Data.Curr <= (TAPER_CURR * 2))
+            #endif
+          ) 
         {
             RtcPreSec = RtcCurrSec;
 			gBatteryInfo.Status.ProtSta = eProt_Full;
@@ -397,11 +401,11 @@ void SOPCalcTask(void)
                 //（最大单体充电电压 - 最大单体电压值） 积分
                 if(gBatteryInfo.Limit.ChgCurrLim > 0)
                 {
-                    chgvoltinte += ((s32)(maxchgvolt - SOPGetBatMaxVolt())) > 4 ? 
+                    chgvoltinte += ((((s32)(maxchgvolt - SOPGetBatMaxVolt())) > 4) && (chgvoltinte > 0)) ? 
                         ((s32)(maxchgvolt - SOPGetBatMaxVolt()) / 4):((s32)(maxchgvolt - SOPGetBatMaxVolt()));
                     
-                    if(chgvoltinte >= 30)
-                        chgvoltinte = 30;
+                    if(chgvoltinte >= 50)
+                        chgvoltinte = 50;
                     else if(chgvoltinte <= (-BAT_NORM_CAP / 10))
                         chgvoltinte = (-BAT_NORM_CAP / 10);
                 }
@@ -417,6 +421,10 @@ void SOPCalcTask(void)
                 {
                     gBatteryInfo.Limit.ChgCurrLim = chglim;
                 }
+            }
+            else
+            {
+                chgvoltinte = 0;
             }
             #else
             if(eChgDchg_Chg == gBatteryInfo.Status.ChgDchgSta)

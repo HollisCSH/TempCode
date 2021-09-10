@@ -33,18 +33,18 @@ typedef unsigned long long u64;
 typedef signed long s32;
 
 typedef unsigned char uint8;
-typedef char int8;
+typedef signed char int8;
 typedef unsigned short uint16;
-typedef short int16;
+typedef signed short int16;
 typedef unsigned int uint32;
 typedef volatile unsigned int vuint32;
 //typedef int int32;
 typedef uint16 wchar;
 
 typedef char BOOLEAN;
-typedef char int8;
+typedef signed char int8;
 //typedef int  int16;
-typedef short int16;
+typedef signed short int16;
 typedef long  int32;
 
 //#define BOOLEAN u8;

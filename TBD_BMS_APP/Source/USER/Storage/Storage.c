@@ -663,7 +663,7 @@ void StorageMainTask(void *p)
             BSPTaskStart(TASK_ID_STORAGE_TASK, 200);	//空闲时200ms周期
 			return;
         }
-		else if(gStorageCTRL & 0x7f) //电源测试或flash操作打开电源
+		else if(gStorageCTRL & 0x017f) //电源测试或flash操作打开电源
 		{
             gPowOffTim = 0;
 			//FLASH_PWR_ON;

@@ -410,7 +410,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name>d</Name>
+          <Name></Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -519,6 +519,11 @@
           <count>18</count>
           <WinNumber>1</WinNumber>
           <ItemText>gSH367309CalCrcbuff</ItemText>
+        </Ww>
+        <Ww>
+          <count>19</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>gPTStorage</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -1391,7 +1396,7 @@
 
   <Group>
     <GroupName>USER/Commom</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1827,7 +1832,7 @@
 
   <Group>
     <GroupName>USER/Sample</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -2083,7 +2088,7 @@
 
   <Group>
     <GroupName>USER/Authentication</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -2115,7 +2120,7 @@
 
   <Group>
     <GroupName>USER/FiniteStateMachine</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

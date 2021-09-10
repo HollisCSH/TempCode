@@ -1980,9 +1980,15 @@ static void SH367309NormalTask(void)
     //MOS管控制
     if(gSHAFECtrl.eventctrl & SH367309_EVE_CTRL_MOS)
     {
+        //位编号2	位符号 ENWDT	
+        //看门狗设置控制位
+        //0： SH367309关闭看门狗模块
+        //1： SH367309开启看门狗模块
+        #define   CONF_BIT_ENWDA    0x04
+        
         //写入控制MOS管
         //result = SH367309MosCtrl(gSHAFECtrl.mosctrl);
-        data = ((gSHAFECtrl.mosctrl & 0x03) << 4) | (gSHAFEReg.CONF.CONFByte & 0xCF);
+        data = ((gSHAFECtrl.mosctrl & 0x03) << 4) | (gSHAFEReg.CONF.CONFByte & 0xCF) | CONF_BIT_ENWDA;
         gSHAFEData.iicres = SH367309WriteRegister(SH367309_IIC_CHANNEL,SH367309_REG_CONF,\
                                                         &(data));
 
